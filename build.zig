@@ -11,10 +11,7 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("hello-zig", "src/main.zig");
-    exe.addIncludeDir("include");
-    exe.linkLibC();
-    exe.addCSourceFile("include/stb_image_impl.c", &[_][]const u8{"-std=c90"});
+    const exe = b.addExecutable("zig-ray", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
