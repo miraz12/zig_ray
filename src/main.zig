@@ -6,7 +6,7 @@ const expect = std.testing.expect;
 pub fn main() anyerror!void {
     // Image
     const aspect_ratio: f32 = 16.0 / 9.0;
-    const image_width: i32 = 400;
+    const image_width: i32 = 1080;
     const image_height: i32 = @floatToInt(i32, @intToFloat(f32, image_width) / aspect_ratio);
 
     // Camera
@@ -55,13 +55,13 @@ fn ray_color(r: ray) vec3 {
 
 fn hit_sphere(center: vec3, radius: f32, r: ray) f32 {
     const oc: vec3 = r.orig.sub(center);
-    const a: f32 = r.dir.dot(r.dir);
-    const b: f32 = 2.0 * oc.dot(r.dir);
-    const c: f32 = oc.dot(oc) - radius * radius;
-    const discriminant = b * b - 4 * a * c;
+    const a: f32 = r.dir.len2();
+    const half_b: f32 = oc.dot(r.dir);
+    const c = oc.len2() - radius * radius;
+    const discriminant = half_b * half_b - a * c;
     if (discriminant < 0.0) {
         return -1.0;
     } else {
-        return (1.0 - b - std.math.sqrt(discriminant) / (2.0 * a));
+        return (-half_b - std.math.sqrt(discriminant)) / a;
     }
 }

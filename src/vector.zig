@@ -94,3 +94,17 @@ pub const Vector3 = struct {
         return self.divVal(self.len());
     }
 };
+
+const expect = @import("std").testing.expect;
+test "Vector3.unitVec" {
+    const epsilon: f32 = 0.00001;
+    const v = Vector3.init(1.0, 2.0, 3.0);
+    const uv = Vector3.unitVec(v);
+    try expect(math.fabs(uv.len() - 1.0) < epsilon);
+}
+
+test "Vector3.dot" {
+    const v1 = Vector3.init(1.0, 0.0, 0.0);
+    const v2 = Vector3.init(0.0, 1.0, 0.0);
+    try expect(v1.dot(v2) == 0.0);
+}
