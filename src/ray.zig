@@ -6,10 +6,7 @@ pub const Ray = struct {
     dir: vec3,
 
     pub fn init(orig: vec3, dir: vec3) Ray {
-        return Ray{
-            .orig = orig,
-            .dir = dir
-        };
+        return Ray{ .orig = orig, .dir = dir };
     }
 
     pub fn at(self: Ray, t: f32) vec3 {

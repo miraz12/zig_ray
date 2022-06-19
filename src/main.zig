@@ -1,6 +1,7 @@
 const std = @import("std");
 const vec3 = @import("vector.zig").Vector3;
 const ray = @import("ray.zig").Ray;
+const hittable = @import("hittables.zig").Ray;
 const expect = std.testing.expect;
 
 pub fn main() anyerror!void {
