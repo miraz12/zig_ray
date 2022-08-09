@@ -6,14 +6,25 @@ const hit_record = struct {
     p: vec3,
     normal: vec3,
     t: f32,
-    front_face: bool
+    front_face: bool,
 
-
+    fn set_face_normal(self: *hit_record, r: ray, outward_normal: *vec3) void {
+        self.front_face = r.dir.dot(outward_normal) < 0;
+        if (self.front_face) {
+            self.normal = outward_normal;
+        } else {
+            self.normal = -outward_normal;
+        }
+    }
 };
 
 const Sphere = struct {
     center: vec3,
     radius: f32,
+
+    fn init(center: vec3, radius: f32) Sphere {
+
+    }
 
     fn hit(self: *Sphere, r: ray, t_min: f32, t_max: f32, rec: *hit_record) bool {
         const oc: vec3 = r.orig.sub(self.center);
@@ -33,8 +44,8 @@ const Sphere = struct {
                 }
             }
             rec.t = root;
-            rec.p = r.at(rec.t);
-            rec.normal = (rec.p - self.center) / self.radius;
+            const outward_normal: vec3 = (rec.p - self.center) / self.radius;
+            rec.set_face_normal(r, outward_normal);
             return true;
         }
     }

@@ -1,7 +1,7 @@
 const std = @import("std");
 const vec3 = @import("vector.zig").Vector3;
 const ray = @import("ray.zig").Ray;
-const hittable = @import("hittables.zig").Ray;
+const sphere = @import("hittables.zig").Sphere;
 const expect = std.testing.expect;
 
 pub fn main() anyerror!void {
@@ -9,6 +9,10 @@ pub fn main() anyerror!void {
     const aspect_ratio: f32 = 16.0 / 9.0;
     const image_width: i32 = 1080;
     const image_height: i32 = @floatToInt(i32, @intToFloat(f32, image_width) / aspect_ratio);
+
+    // World
+    const world: [_]sphere;
+
 
     // Camera
     const viewport_height: f32 = 2.0;
