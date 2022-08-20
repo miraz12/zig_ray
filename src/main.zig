@@ -68,7 +68,7 @@ fn ray_color(r: Ray, world: ArrayList(Sphere)) Vec3 {
             hitAnything = true;
         }
     }
-    if ( hitAnything ) {
+    if (hitAnything) {
         return (Vec3.init(rec.normal.x + 1.0, rec.normal.y + 1.0, rec.normal.z + 1.0)).mulVal(0.5);
     }
 
