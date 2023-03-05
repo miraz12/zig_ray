@@ -5,6 +5,7 @@ const Vec3 = @import("vector.zig").Vector3;
 const Ray = @import("ray.zig").Ray;
 const Sphere = @import("hittables.zig").Sphere;
 const HitRecord = @import("hittables.zig").HitRecord;
+const Camera = @import("camera.zig").Camera;
 const ArrayList = std.ArrayList;
 
 pub fn main() anyerror!void {
@@ -21,14 +22,7 @@ pub fn main() anyerror!void {
     try world.append(Sphere.init(Vec3.init(0.0, 0.0, -1.0), 0.5));
 
     // Camera
-    const viewport_height: f32 = 2.0;
-    const viewport_width: f32 = aspect_ratio * viewport_height;
-    const focal_length: f32 = 1.0;
-
-    const origin: Vec3 = Vec3.init(0.0, 0.0, 0.0);
-    const horizontal: Vec3 = Vec3.init(viewport_width, 0.0, 0.0);
-    const vertical: Vec3 = Vec3.init(0.0, viewport_height, 0.0);
-    const lower_left_corner: Vec3 = origin.sub(horizontal.divVal(2)).sub(vertical.divVal(2)).sub(Vec3.init(0.0, 0.0, focal_length));
+    const cam: Camera = Camera.init();
 
     const stdout = std.io.getStdOut().writer();
     try stdout.print("P3\n{} {}\n255\n", .{ image_width, image_height });
@@ -40,8 +34,7 @@ pub fn main() anyerror!void {
         while (i < image_width) : (i += 1) {
             const u: f32 = @intToFloat(f32, i) / @intToFloat(f32, image_width - 1);
             const v: f32 = @intToFloat(f32, j) / @intToFloat(f32, image_height - 1);
-            const r: Ray = Ray.init(origin, lower_left_corner.add(horizontal.mulVal(u)).add(vertical.mulVal(v)).sub(origin));
-            const pixel_color: Vec3 = ray_color(r, world);
+            const pixel_color: Vec3 = ray_color(cam.get_ray(u, v), world);
             try write_color(stdout, pixel_color);
         }
     }
