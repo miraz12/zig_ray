@@ -1,6 +1,7 @@
 const std = @import("std");
 const expect = std.testing.expect;
 const rndGen = std.rand.DefaultPrng;
+const Random = std.rand.Random;
 const math = std.math;
 
 const Vec3 = @import("vector.zig").Vector3;
@@ -13,9 +14,9 @@ const ArrayList = std.ArrayList;
 pub fn main() anyerror!void {
     // Image
     const aspect_ratio: f32 = 16.0 / 9.0;
-    const image_width: i32 = 1080;
+    const image_width: i32 = 800;
     const image_height: i32 = @floatToInt(i32, @intToFloat(f32, image_width) / aspect_ratio);
-    const num_samples: i32 = 50;
+    const num_samples: i32 = 5;
 
     // // World
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -30,11 +31,8 @@ pub fn main() anyerror!void {
     const stdout = std.io.getStdOut().writer();
     try stdout.print("P3\n{} {}\n255\n", .{ image_width, image_height });
 
-    var prng = rndGen.init(blk: {
-        var seed: u64 = undefined;
-        try std.os.getrandom(std.mem.asBytes(&seed));
-        break :blk seed;
-    });
+    const seed = @truncate(u64, @bitCast(u128, std.time.nanoTimestamp()));
+    var prng = rndGen.init(seed);
     const rnd = prng.random();
 
     var j: i32 = image_height - 1;
@@ -47,7 +45,7 @@ pub fn main() anyerror!void {
             while (k <= num_samples) : (k += 1) {
                 const u: f32 = (@intToFloat(f32, i) + rnd.float(f32)) / @intToFloat(f32, image_width - 1);
                 const v: f32 = (@intToFloat(f32, j) + rnd.float(f32)) / @intToFloat(f32, image_height - 1);
-                pixel_color = Vec3.add(pixel_color, ray_color(cam.get_ray(u, v), world));
+                pixel_color = pixel_color.add(ray_color(cam.get_ray(u, v), world, 50, rnd));
             }
             try write_color(stdout, pixel_color, num_samples);
         }
@@ -58,13 +56,16 @@ pub fn main() anyerror!void {
 
 fn write_color(out: std.fs.File.Writer, vec: Vec3, numSamples: i32) !void {
     const scale = 1.0 / @intToFloat(f32, numSamples);
-    const r: f32 = math.clamp(vec.x * scale, 0.0, 0.999);
-    const g: f32 = math.clamp(vec.y * scale, 0.0, 0.999);
-    const b: f32 = math.clamp(vec.z * scale, 0.0, 0.999);
+    const r: f32 = math.clamp(math.sqrt(vec.x * scale), 0.0, 0.999);
+    const g: f32 = math.clamp(math.sqrt(vec.y * scale), 0.0, 0.999);
+    const b: f32 = math.clamp(math.sqrt(vec.z * scale), 0.0, 0.999);
     try out.print("{} {} {}\n", .{ @floatToInt(i32, r * 256), @floatToInt(i32, g * 256), @floatToInt(i32, b * 256) });
 }
 
-fn ray_color(r: Ray, world: ArrayList(Sphere)) Vec3 {
+fn ray_color(r: Ray, world: ArrayList(Sphere), depth: u32, rnd: Random) Vec3 {
+    if (depth == 0) {
+        return Vec3.init(0.0, 0.0, 0.0);
+    }
     var i: usize = 0;
     var rec: HitRecord = undefined;
     var tempRec: HitRecord = undefined;
@@ -80,7 +81,8 @@ fn ray_color(r: Ray, world: ArrayList(Sphere)) Vec3 {
         }
     }
     if (hitAnything) {
-        return (Vec3.init(rec.normal.x + 1.0, rec.normal.y + 1.0, rec.normal.z + 1.0)).mulVal(0.5);
+        const target: Vec3 = rec.p.add(rec.normal).add(Vec3.randomInUnitSphere(rnd));
+        return ray_color(Ray.init(rec.p, target.sub(rec.p)), world, depth - 1, rnd).mulVal(0.5);
     }
 
     const unit_direction: Vec3 = r.dir.unitVec();

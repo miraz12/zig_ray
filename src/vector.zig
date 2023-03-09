@@ -1,5 +1,6 @@
 const std = @import("std");
 const math = std.math;
+const Random = std.rand.Random;
 
 pub const Vector3 = struct {
     x: f32,
@@ -92,6 +93,15 @@ pub const Vector3 = struct {
 
     pub fn unitVec(self: Vector3) Vector3 {
         return self.divVal(self.len());
+    }
+
+    pub fn randomInUnitSphere(rnd: Random) Vector3 {
+        return while (true) {
+            const p = Vector3.init(rnd.float(f32) * 2.0 - 1.0, rnd.float(f32) * 2.0 - 1.0, rnd.float(f32) * 2.0 - 1.0);
+            if (p.len2() < 1.0) {
+                break p;
+            }
+        };
     }
 };
 
