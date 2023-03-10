@@ -74,7 +74,7 @@ fn ray_color(r: Ray, world: ArrayList(Sphere), depth: u32, rnd: Random) Vec3 {
 
     while (i < world.items.len) : (i += 1) {
         var elem = world.items[i];
-        if (elem.hit(r, 0.0, closest, &tempRec)) {
+        if (elem.hit(r, 0.001, closest, &tempRec)) {
             closest = tempRec.t;
             rec = tempRec;
             hitAnything = true;
