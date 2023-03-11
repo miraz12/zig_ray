@@ -91,8 +91,29 @@ pub const Vector3 = struct {
         return self.x * self.x + self.y * self.y + self.z * self.z;
     }
 
+    pub fn reflect(v: Vector3, n: Vector3) Vector3 {
+        return v.sub(n.mulVal(2.0 * v.dot(n)));
+    }
+
+    pub fn refract(uv: Vector3, n: Vector3, etai_over_etat: f32) Vector3 {
+        var cos_theta = math.min(-uv.dot(n), 1.0);
+        const r_out_prep: Vector3 = uv.add(n.mulVal(cos_theta)).mulVal(etai_over_etat);
+        const r_out_paralell: Vector3 = n.mulVal(-math.sqrt(math.fabs(1.0 - r_out_prep.len2())));
+        return r_out_prep.add(r_out_paralell);
+    }
+
     pub fn unitVec(self: Vector3) Vector3 {
         return self.divVal(self.len());
+    }
+
+    pub fn randomUnitVec(rnd: Random) Vector3 {
+        var vec = randomInUnitSphere(rnd);
+        return vec.divVal(vec.len());
+    }
+
+    pub fn nearZero(self: Vector3) bool {
+        const s = 1e-8;
+        return (math.fabs(self.x) < s) and (math.fabs(self.y) < s) and (math.fabs(self.z) < s);
     }
 
     pub fn randomInUnitSphere(rnd: Random) Vector3 {
@@ -102,6 +123,24 @@ pub const Vector3 = struct {
                 break p;
             }
         };
+    }
+
+    pub fn randomInUnitDisk(rnd: Random) Vector3 {
+        return while (true) {
+            const p = Vector3.init(rnd.float(f32) * 2.0 - 1.0, rnd.float(f32) * 2.0 - 1.0, 0.0);
+            if (p.len2() < 1.0) {
+                break p;
+            }
+        };
+    }
+
+    pub fn randomInHemisphere(norm: Vector3, rnd: Random) Vector3 {
+        var vec: Vector3 = randomUnitVec(rnd);
+        if (vec.dot(norm) > 0.0) {
+            return vec;
+        } else {
+            return vec.mulVal(-1.0);
+        }
     }
 };
 

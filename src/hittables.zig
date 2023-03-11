@@ -1,13 +1,17 @@
 const std = @import("std");
-
+const material = @import("material.zig");
+const Material = material.Material;
 const Vec3 = @import("vector.zig").Vector3;
 const Ray = @import("ray.zig").Ray;
+const Random = std.rand.Random;
 
 pub const HitRecord = struct {
     p: Vec3,
     normal: Vec3,
     t: f32,
     front_face: bool,
+    mat: Material,
+    materialScatterFn: *const fn (mat: Material, r_in: Ray, rec: HitRecord, rnd: Random, attenuation: *Vec3, scattered: *Ray) bool,
 
     fn set_face_normal(self: *HitRecord, r: Ray, outward_normal: Vec3) void {
         self.front_face = r.dir.dot(outward_normal) < 0;
@@ -22,9 +26,16 @@ pub const HitRecord = struct {
 pub const Sphere = struct {
     center: Vec3,
     radius: f32,
+    mat: Material,
+    materialScatterFn: *const fn (mat: Material, r_in: Ray, rec: HitRecord, rnd: Random, attenuation: *Vec3, scattered: *Ray) bool,
 
-    pub fn init(center: Vec3, radius: f32) Sphere {
-        return Sphere{ .center = center, .radius = radius };
+    pub fn init(
+        center: Vec3,
+        radius: f32,
+        mat: Material,
+        scatterFn: *const fn (mat: Material, r_in: Ray, rec: HitRecord, rnd: Random, attenuation: *Vec3, scattered: *Ray) bool,
+    ) Sphere {
+        return Sphere{ .center = center, .radius = radius, .materialScatterFn = scatterFn, .mat = mat };
     }
 
     pub fn hit(self: *Sphere, r: Ray, t_min: f32, t_max: f32, rec: *HitRecord) bool {
@@ -48,6 +59,8 @@ pub const Sphere = struct {
             rec.p = r.at(rec.t);
             var outward_normal: Vec3 = (rec.p.sub(self.center)).divVal(self.radius);
             rec.set_face_normal(r, outward_normal);
+            rec.materialScatterFn = self.materialScatterFn;
+            rec.mat = self.mat;
             return true;
         }
     }
