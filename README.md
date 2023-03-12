@@ -3,6 +3,7 @@
 A zig implementaion of Peter Shirley's "Ray Tracing in One Weekend". Created to learn zig for fun!
 
 Future steps:
+- [ ] Code cleanup.
 - [ ] Multithreading.
 - [ ] Implement "The next week"
 - [ ] Implement "The rest of your life"
