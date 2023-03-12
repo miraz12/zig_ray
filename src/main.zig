@@ -42,7 +42,9 @@ pub fn main() anyerror!void {
                     try world.append(Sphere.init(center, 0.2, Material{ .albedo = Vec3.init(rnd.float(f32), rnd.float(f32), rnd.float(f32)) }, material.Lambertian.scatter));
                 } else if (choose_mat < 0.95) {
                     // metal
-                    try world.append(Sphere.init(center, 0.2, Material{ .albedo = Vec3.init(0.8, 0.6, 0.2), .fuzz = 0.0 }, material.Metal.scatter));
+                    const albedo = Vec3.init(rnd.float(f32) * (1.0 - 0.5) + 0.5, rnd.float(f32) * (1.0 - 0.5) + 0.5, rnd.float(f32) * (1.0 - 0.5) + 0.5);
+                    const fuzz = rnd.float(f32) * (1.0 - 0.5) + 0.5;
+                    try world.append(Sphere.init(center, 0.2, Material{ .albedo = albedo, .fuzz = fuzz }, material.Metal.scatter));
                 } else {
                     // glass
                     try world.append(Sphere.init(center, 0.2, Material{ .ir = 1.5 }, material.Dialectric.scatter));
@@ -51,7 +53,7 @@ pub fn main() anyerror!void {
         }
     }
 
-    try world.append(Sphere.init(Vec3.init(0.0, 1.0, 0.0), 1.0, Material{ .albedo = Vec3.init(0.1, 0.2, 0.5) }, material.Lambertian.scatter));
+    try world.append(Sphere.init(Vec3.init(0.0, 1.0, 0.0), 1.0, Material{ .albedo = Vec3.init(0.4, 0.2, 0.1) }, material.Lambertian.scatter));
     try world.append(Sphere.init(Vec3.init(-4.0, 1.0, 0.0), 1.0, Material{ .ir = 1.5 }, material.Dialectric.scatter));
     try world.append(Sphere.init(Vec3.init(4.0, 1.0, 0.0), 1.0, Material{ .albedo = Vec3.init(0.7, 0.6, 0.5), .fuzz = 0.0 }, material.Metal.scatter));
 
